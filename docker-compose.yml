@@ -1,0 +1,81 @@
+version: '3.8'
+
+networks:
+  red_entorno:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+
+services:
+  # 1. Servidor Web Nginx
+  web_server:
+    image: nginx:alpine
+    container_name: nginx_contenedor
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - red_entorno
+    depends_on:
+      - node_app
+
+  # 2. Servidor de aplicaciones Node.js
+  node_app:
+    build: ./node-api
+    container_name: node_contenedor
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
+    environment:
+      - DB_HOST=database
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+    networks:
+      - red_entorno
+    depends_on:
+      - database
+
+  # 3. Base de datos PostgreSQL
+  database:
+    image: postgres:15-alpine
+    container_name: postgres_contenedor
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - red_entorno
+    ports:
+      - "5432:5432"
+
+  # 4. Administrador de Base de Datos pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_contenedor
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@tutor.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - red_entorno
+    depends_on:
+      - database
+
+  # 5. Entorno de Ciencia de Datos Jupyter Lab
+  jupyter:
+    image: jupyter/base-notebook
+    container_name: jupyter_contenedor
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}
+    volumes:
+      - ./jupyter:/home/jovyan/work
+    networks:
+      - red_entorno

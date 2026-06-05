@@ -1,0 +1,36 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Tabla para simular datos masivos de usuarios
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String
+  empresa   String
+  creadoEn  DateTime @default(now())
+  posts     Post[]
+}
+
+// Tabla relacionada para JOINS complejos sin índices optimizados
+model Post {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  contenido   String
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+// Tabla para registrar las métricas del estrés provocado
+model LogEstres {
+  id             Int      @id @default(autoincrement())
+  timestamp      DateTime @default(now())
+  tipoOperacion  String
+  duracionMs     Int
+  filasAfectadas Int
+}

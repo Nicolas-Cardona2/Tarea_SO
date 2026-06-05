@@ -1,9 +1,12 @@
 {
-  "name": "node-api",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "express": "^4.18.2",
-    "pg": "^8.11.0"
-  }
+	"dependencies": {
+		"@prisma/client": "^6.9.0",
+		"chart.js": "^4.5.1",
+		"lucide-react": "^1.17.0",
+		"react-chartjs-2": "^5.3.1"
+	},
+	"packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81",
+	"devDependencies": {
+		"prisma": "^6.9.0"
+	}
 }

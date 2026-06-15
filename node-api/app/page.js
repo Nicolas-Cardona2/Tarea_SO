@@ -7,6 +7,9 @@ export default function Dashboard() {
   const [logs, setLogs] = useState([]);
   const [testStatus, setTestStatus] = useState({ http: false, apocalypse: false });
   const [stats, setStats] = useState({ completadas: 0, fallidas: 0 });
+  const [httpRequests, setHttpRequests] = useState(200);
+  const [insertSize, setInsertSize] = useState(3000);
+  const [lockTime, setLockTime] = useState(2000);
 
   useEffect(() => {
     const intervalo = setInterval(async () => {
@@ -29,7 +32,7 @@ export default function Dashboard() {
     setTestStatus(p => ({ ...p, http: true }));
     addLog("🚀 Disparando ráfaga HTTP Flood (200 peticiones concurrentes)...");
     
-    const promesas = Array.from({ length: 200 }).map(async () => {
+    const promesas = Array.from({ length: httpRequests }).map(async () => {
       try {
         const r = await fetch('/api/stress/http');
         if (r.ok) setStats(s => ({ ...s, completadas: s.completadas + 1 }));
@@ -50,7 +53,11 @@ export default function Dashboard() {
       const r = await fetch('/api/stress/db', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accion: tipo })
+        body: JSON.stringify({ 
+	  accion: tipo,
+          cantidad: insertSize,
+          lockTime: lockTime 
+      })
       });
       const data = await r.json();
       if (data.exito) {
@@ -118,6 +125,57 @@ export default function Dashboard() {
       </section>
 
       {/* Disparadores de carga */}
+     <section className="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-6">
+
+<h2 className="font-bold mb-4">
+Configuración de estrés
+</h2>
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+<div>
+<label className="text-sm">
+HTTP Requests
+</label>
+
+<input
+type="number"
+value={httpRequests}
+onChange={(e)=>setHttpRequests(Number(e.target.value))}
+className="w-full text-black p-2 rounded"
+/>
+</div>
+
+<div>
+<label className="text-sm">
+Insert Batch
+</label>
+
+<input
+type="number"
+value={insertSize}
+onChange={(e)=>setInsertSize(Number(e.target.value))}
+className="w-full text-black p-2 rounded"
+/>
+</div>
+
+<div>
+<label className="text-sm">
+Lock Time (ms)
+</label>
+
+<input
+type="number"
+value={lockTime}
+onChange={(e)=>setLockTime(Number(e.target.value))}
+className="w-full text-black p-2 rounded"
+/>
+</div>
+
+</div>
+
+</section>
+
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-slate-900 p-5 rounded-xl border border-slate-800">
           <h2 className="text-md font-bold mb-4 text-slate-300 flex items-center">Ataque HTTP Concurrentes (CPU bound)</h2>

@@ -5,13 +5,17 @@ const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
-    const { accion } = await request.json();
+    const {
+ 	     accion,
+  	     cantidad,
+       	     lockTime
+	} = await request.json();
     const inicio = Date.now();
     let filas = 0;
 
     if (accion === 'insert') {
       // Inserción masiva de 3,000 registros simultáneos
-      const usuarios = Array.from({ length: 3000 }).map((_, i) => ({
+      const usuarios = Array.from({ length: cantidad || 3000 }).map((_, i) => ({
         nombre: `Sujeto_Stress_${i}_${Date.now()}`,
         email: `stress_${i}_${Date.now()}@ies.com`,
         empresa: "Laboratorio de Sistemas Operativos"
@@ -42,7 +46,7 @@ export async function POST(request) {
         const u = await tx.usuario.findMany({ take: 500 });
         filas = u.length;
         // Congelar el hilo por 2 segundos para retener los candados lógicos en Postgres
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, lockTime || 2000));
       });
     }
 
